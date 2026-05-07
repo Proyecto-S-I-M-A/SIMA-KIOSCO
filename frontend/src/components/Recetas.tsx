@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSimaStore } from '../store/simaStore';
+import CardRecetas from './cardRecetas';
+
 
 export interface Inventario {
   id: string;
@@ -127,10 +129,34 @@ export default function Recetas() {
             <h2 className="text-3xl text-text-secondary">No hay recetas pendientes para esta cédula.</h2>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto pr-4" style={{ touchAction: 'pan-y' }}>
+          <div className="flex-2 overflow-y-auto pr-4" style={{ touchAction: 'pan-y' }}>
             <div className="grid grid-cols-1 gap-6">
               {recetas.map((r, i) => (
                 <div key={r.id || i} className="bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-100 flex flex-col gap-6">
+
+                  <CardRecetas data={r} />
+                </div>
+
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {recetas.length > 0 && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={handleDespachar}
+            className="bg-success-main text-white text-4xl font-bold py-8 px-16 w-full rounded-2xl shadow-xl active:scale-95 transition-transform"
+          >
+            Ordenar y Despachar Todo
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+{/* <div key={r.id || i} className="bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-100 flex flex-col gap-6">
                   <div className="border-b-2 border-gray-100 pb-4">
                     <h3 className="text-2xl font-bold text-text-primary">Receta de Dr(a). {r.doctor_remitente}</h3>
                     <p className="text-xl text-text-secondary">Código: {r.codigo} | Fecha: {new Date(r.createdAt || r.fecha).toLocaleDateString()}</p>
@@ -152,23 +178,4 @@ export default function Recetas() {
                       </div>
                     ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {recetas.length > 0 && (
-        <div className="mt-8 flex justify-center">
-          <button
-            onClick={handleDespachar}
-            className="bg-success-main text-white text-4xl font-bold py-8 px-16 w-full rounded-2xl shadow-xl active:scale-95 transition-transform"
-          >
-            Ordenar y Despachar Todo
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
+                </div> */}
