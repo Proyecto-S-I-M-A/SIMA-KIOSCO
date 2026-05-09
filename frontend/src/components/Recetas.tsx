@@ -130,11 +130,11 @@ export default function Recetas() {
           </div>
         ) : (
           <div className="flex-2 overflow-y-auto pr-4" style={{ touchAction: 'pan-y' }}>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recetas.map((r, i) => (
                 <div key={r.id || i} className="bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-100 flex flex-col gap-6">
 
-                  <CardRecetas data={r} />
+                  <CardRecetas recipe={r} />
                 </div>
 
               ))}

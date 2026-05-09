@@ -1,0 +1,452 @@
+[
+    {
+        "id": "8",
+        "doctor_remitente": null,
+        "ruc_doctor_remitente": null,
+        "hospital_remitente": "kkm",
+        "telefono_hospital": "7364837",
+        "correo": "dkaiwmid@gmam.com",
+        "codigo": -2,
+        "fecha": "2026-05-02T21:34:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-05-02T21:34:50.405Z",
+        "updatedAt": "2026-05-02T21:34:50.405Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "6",
+                "id_receta": "8",
+                "id_medicamento": "1",
+                "cantidad": 1,
+                "instrucciones": "cada 8 horas",
+                "createdAt": "2026-05-02T21:34:51.189Z",
+                "updatedAt": "2026-05-02T21:34:51.189Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "9",
+        "doctor_remitente": null,
+        "ruc_doctor_remitente": null,
+        "hospital_remitente": "rdad",
+        "telefono_hospital": "7364837",
+        "correo": "dkaiwmid@gmam.com",
+        "codigo": 3,
+        "fecha": "2026-05-02T21:45:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-05-02T21:46:20.801Z",
+        "updatedAt": "2026-05-02T21:46:20.801Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "7",
+                "id_receta": "9",
+                "id_medicamento": "1",
+                "cantidad": 3,
+                "instrucciones": "cada 8 horas",
+                "createdAt": "2026-05-02T21:46:21.817Z",
+                "updatedAt": "2026-05-02T21:46:21.817Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "10",
+        "doctor_remitente": null,
+        "ruc_doctor_remitente": null,
+        "hospital_remitente": "rdad",
+        "telefono_hospital": "223",
+        "correo": "dkaiwmid@gmam.com",
+        "codigo": 2,
+        "fecha": "2026-05-02T21:48:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-05-02T21:48:15.290Z",
+        "updatedAt": "2026-05-02T21:48:15.290Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "8",
+                "id_receta": "10",
+                "id_medicamento": "1",
+                "cantidad": 4,
+                "instrucciones": "cada 8 horas",
+                "createdAt": "2026-05-02T21:48:16.198Z",
+                "updatedAt": "2026-05-02T21:48:16.198Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "12",
+        "doctor_remitente": "Dr. Ricardo Miro",
+        "ruc_doctor_remitente": "13512312512",
+        "hospital_remitente": "kkm",
+        "telefono_hospital": "223",
+        "correo": "dkaiwmid@gmam.com",
+        "codigo": 45,
+        "fecha": "2026-05-02T21:58:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-05-02T21:58:26.236Z",
+        "updatedAt": "2026-05-02T21:58:26.236Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "10",
+                "id_receta": "12",
+                "id_medicamento": "2",
+                "cantidad": 2,
+                "instrucciones": "cada 8 horas",
+                "createdAt": "2026-05-02T21:58:26.997Z",
+                "updatedAt": "2026-05-02T21:58:26.997Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "2",
+                    "nombre_medicamento": "uygio",
+                    "marca": "generica",
+                    "precio": "3",
+                    "cantidad": null,
+                    "resetado": false,
+                    "createdAt": "2026-04-24T14:06:47.905Z",
+                    "updatedAt": "2026-04-24T14:06:47.905Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "13",
+        "doctor_remitente": "Dr. Ricardo Miro",
+        "ruc_doctor_remitente": "13512312512",
+        "hospital_remitente": "don bosco",
+        "telefono_hospital": "7364837",
+        "correo": "dkaiwmid@gmam.com",
+        "codigo": 21,
+        "fecha": "2026-05-02T22:02:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-05-02T22:02:30.305Z",
+        "updatedAt": "2026-05-02T22:02:30.305Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "11",
+                "id_receta": "13",
+                "id_medicamento": "1",
+                "cantidad": 2,
+                "instrucciones": "cada 8 horas",
+                "createdAt": "2026-05-02T22:02:31.200Z",
+                "updatedAt": "2026-05-02T22:02:31.200Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "1",
+        "doctor_remitente": "Ricardo Miro",
+        "ruc_doctor_remitente": "11212341",
+        "hospital_remitente": "San Fernando",
+        "telefono_hospital": "7568-6575",
+        "correo": "SanFernando@hospital.com",
+        "codigo": 213,
+        "fecha": "2026-04-22T00:00:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-04-22T21:01:33.802Z",
+        "updatedAt": "2026-05-05T23:52:07.401Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "1",
+                "id_receta": "1",
+                "id_medicamento": "1",
+                "cantidad": 30,
+                "instrucciones": "Tomar cada 4 horas",
+                "createdAt": "2026-04-22T21:02:15.291Z",
+                "updatedAt": "2026-04-22T21:02:15.291Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "doctor_remitente": "Pepe Ariaz",
+        "ruc_doctor_remitente": "12323",
+        "hospital_remitente": "24 De Dic",
+        "telefono_hospital": "673638209",
+        "correo": "Hospital24Dic@gmail.com",
+        "codigo": 232,
+        "fecha": null,
+        "estado": "pendiente",
+        "createdAt": "2026-04-24T23:16:21.734Z",
+        "updatedAt": "2026-05-05T23:53:25.606Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": []
+    },
+    {
+        "id": "5",
+        "doctor_remitente": "perez",
+        "ruc_doctor_remitente": "12412",
+        "hospital_remitente": "awdaw",
+        "telefono_hospital": "3214-3245",
+        "correo": "awd@awd.com",
+        "codigo": 532346,
+        "fecha": "2026-04-25T00:00:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-04-25T21:31:39.883Z",
+        "updatedAt": "2026-04-25T21:31:39.883Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "2",
+                "id_receta": "5",
+                "id_medicamento": "1",
+                "cantidad": 1,
+                "instrucciones": "2fawafw",
+                "createdAt": "2026-04-25T21:31:40.747Z",
+                "updatedAt": "2026-04-25T21:31:40.747Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "6",
+        "doctor_remitente": "perez",
+        "ruc_doctor_remitente": "12412",
+        "hospital_remitente": "awdaw",
+        "telefono_hospital": "3214-3245",
+        "correo": "awd@awd.com",
+        "codigo": 2326,
+        "fecha": "2026-04-25T00:00:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-04-25T21:32:54.089Z",
+        "updatedAt": "2026-04-25T21:32:54.089Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "3",
+                "id_receta": "6",
+                "id_medicamento": "1",
+                "cantidad": 1,
+                "instrucciones": "wdad",
+                "createdAt": "2026-04-25T21:32:54.251Z",
+                "updatedAt": "2026-04-25T21:32:54.251Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            },
+            {
+                "id": "4",
+                "id_receta": "6",
+                "id_medicamento": "2",
+                "cantidad": 4231,
+                "instrucciones": "awdawfa",
+                "createdAt": "2026-04-25T21:32:54.251Z",
+                "updatedAt": "2026-04-25T21:32:54.251Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "2",
+                    "nombre_medicamento": "uygio",
+                    "marca": "generica",
+                    "precio": "3",
+                    "cantidad": null,
+                    "resetado": false,
+                    "createdAt": "2026-04-24T14:06:47.905Z",
+                    "updatedAt": "2026-04-24T14:06:47.905Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "7",
+        "doctor_remitente": null,
+        "ruc_doctor_remitente": null,
+        "hospital_remitente": "kkm",
+        "telefono_hospital": "7364837",
+        "correo": "dkaiwmid@gmam.com",
+        "codigo": 12,
+        "fecha": "2026-05-02T21:26:00.000Z",
+        "estado": "pendiente",
+        "createdAt": "2026-05-02T21:26:26.780Z",
+        "updatedAt": "2026-05-02T21:26:26.780Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "5",
+                "id_receta": "7",
+                "id_medicamento": "1",
+                "cantidad": 11,
+                "instrucciones": "cada 8 horas",
+                "createdAt": "2026-05-02T21:26:27.700Z",
+                "updatedAt": "2026-05-02T21:26:27.700Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    },
+    {
+        "id": "23",
+        "doctor_remitente": "Ricardo Miro",
+        "ruc_doctor_remitente": "13512312512",
+        "hospital_remitente": "panama",
+        "telefono_hospital": "45544",
+        "correo": null,
+        "codigo": 53712,
+        "fecha": "2026-05-03T08:14:30.773Z",
+        "estado": "retirada",
+        "createdAt": "2026-05-03T08:14:33.233Z",
+        "updatedAt": "2026-05-03T08:14:33.233Z",
+        "id_cliente": "1",
+        "ClienteId": null,
+        "dosis": [
+            {
+                "id": "23",
+                "id_receta": "23",
+                "id_medicamento": "1",
+                "cantidad": 2,
+                "instrucciones": "cada 3 horas",
+                "createdAt": "2026-05-03T08:14:35.282Z",
+                "updatedAt": "2026-05-03T08:14:35.282Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "1",
+                    "nombre_medicamento": "paracetamol",
+                    "marca": "generica",
+                    "precio": "1.23",
+                    "cantidad": null,
+                    "resetado": true,
+                    "createdAt": "2026-04-21T22:15:10.313Z",
+                    "updatedAt": "2026-04-21T22:19:29.166Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            },
+            {
+                "id": "24",
+                "id_receta": "23",
+                "id_medicamento": "2",
+                "cantidad": 3,
+                "instrucciones": "cada 8 hours",
+                "createdAt": "2026-05-03T08:14:35.283Z",
+                "updatedAt": "2026-05-03T08:14:35.283Z",
+                "RecetumId": null,
+                "inventario": {
+                    "id": "2",
+                    "nombre_medicamento": "uygio",
+                    "marca": "generica",
+                    "precio": "3",
+                    "cantidad": null,
+                    "resetado": false,
+                    "createdAt": "2026-04-24T14:06:47.905Z",
+                    "updatedAt": "2026-04-24T14:06:47.905Z",
+                    "id_maquina": null,
+                    "MaquinaId": null
+                }
+            }
+        ]
+    }
+]
