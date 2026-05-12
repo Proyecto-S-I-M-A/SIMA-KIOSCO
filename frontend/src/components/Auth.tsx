@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSimaStore } from '../store/simaStore';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import { usePatientScanner } from '../hooks/usePatientScanner';
 // Se quito el react, ya que no es necesario en esta version de react
 export default function Auth() {
   const [method, setMethod] = useState<'HOME' | 'SCAN' | 'MANUAL'>('HOME');
@@ -9,10 +10,8 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const login = useSimaStore((state) => state.login);
 
-  const formatCedula = /^\d{1,2}-\d{3,4}-\d{3,4}$/;
-
   const handleValidCedula = async (cedula: string) => {
-    if (!formatCedula.test(cedula)) {
+    if (!cedula) {
       setError('Formato de cédula inválido. Ej: 8-123-4567');
       return;
     }
@@ -20,17 +19,14 @@ export default function Auth() {
     setError('');
     setLoading(true);
 
-    // Simula retraso de red para obtener Token real
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const simulatedToken = 'eyJhbGciOiJFUzI1NiIsImtpZCI6ImNhNDRkYjVkLWUzNmEtNGRkMC04ODliLTU0NGRlZjQ0MTY4YiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3VzdHF3aWhrbXN1bWdyY2ludHhsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyMDBjN2QxZC04MTRlLTQ5NmItOTcwMS02ZDQxMTMxNjEzNTMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc4MzAxNDQ2LCJpYXQiOjE3NzgyOTc4NDYsImVtYWlsIjoicnViZW5AZWplbXBsby5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoicnViZW5AZWplbXBsby5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiIyMDBjN2QxZC04MTRlLTQ5NmItOTcwMS02ZDQxMTMxNjEzNTMifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc3ODI5Nzg0Nn1dLCJzZXNzaW9uX2lkIjoiMmUzZjAzZWUtNzU0OS00ZTdlLWFmM2UtOTczYWVlZmMzYWY0IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.cVJYPwQ2nYY9Bm5I6Dblw9uCLNT67Q2gFnDioZuYiTLx5re-H2U53sVJKBIhUz7VFvw92D5JL58XcTyNzIi-9A';
-
     setLoading(false);
-    login(cedula, simulatedToken);
+    login(cedula);
   };
 
   const handleScan = (result: any) => {
     if (result && result.length > 0 && result[0].rawValue) {
-      handleValidCedula(result[0].rawValue);
+      const isNorma = usePatientScanner(result[0].rawValue);
+      handleValidCedula(isNorma);
     }
   };
 
