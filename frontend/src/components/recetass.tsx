@@ -1,13 +1,6 @@
-
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
 import { useSimaStore } from '../store/simaStore';
+import CardRecetas from './cardRecetas';
 import { useRecetas } from '../hooks/useRecetas';
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft,
   HelpCircle,
@@ -25,41 +18,30 @@ import {
   ArrowRight,
   Pill
 } from 'lucide-react';
-import type { Medication } from '../components/constants';
-import { MEDICATIONS } from '../components/constants';
-import Header from '../components/Header';
-import type { Receta } from '../hooks/useRecetas';
+import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
 type Step = 'identify' | 'select' | 'pay' | 'dispense';
-
-export default function Recetas() {
-
+export default function Recetss() {
+  const { cedula, setView } = useSimaStore();
   const { recetas, loading, error } = useRecetas();
-  //Relevantes
 
   const logout = useSimaStore(state => state.logout);
-  const [medicamentosBase, setMedicamentosBase] = useState<Medication[]>(MEDICATIONS);
-  const [pastillitas, setPastillitas] = useState<Receta[]>(recetas);
-
-
+  const [currentStep, setCurrentStep] = useState<Step>('select');
   // Inicia sin selección
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [view, setView] = useState<'selection' | 'summary'>('selection');
+  const [view, setSection] = useState<'selection' | 'summary'>('selection');
 
-  const selectedMedicines = recetas.filter(m => selectedIds.includes(m.id));
-  /* const subtotal = selectedMedicines.reduce((acc, curr) => acc + curr.price, 0);
-  const taxes = subtotal * 0.12; */
-  const dispensingFee = 0.50;
-  /*   const total = subtotal + taxes + dispensingFee; */
 
   const toggleSelection = (id: string) => {
     setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
-    ;
   };
 
 
-
+  const handleDespachar = () => {
+    setView('DESPACHO');
+  };
 
   if (loading) {
     return (
@@ -86,9 +68,9 @@ export default function Recetas() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <Header />
+      {/*   <Header /> */}
 
       {/* Progress Bar for Selection View */}
       {view === 'selection' && (
@@ -120,7 +102,7 @@ export default function Recetas() {
       )}
 
       {/* Main Content */}
-      <main className="grow overflow-y-auto max-w-7xl mx-auto w-full px-6 py-10">
+      <main className="flex-grow max-w-7xl mx-auto w-full px-6 py-10">
         <AnimatePresence mode="wait">
           {view === 'selection' ? (
             <motion.div
@@ -139,15 +121,16 @@ export default function Recetas() {
                   <p className="text-slate-500 font-medium">Seleccione los medicamentos que desea retirar hoy.</p>
                 </div>
               </div>
-              {/* RECETAS */}
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recetas.map((r) => (
+
+                {recetas.map((med) => (
                   <div
-                    key={r.id}
-                    className={`bg-white rounded-2xl p-6 border-2 transition-all flex flex-col gap-4 relative group shadow-sm ${selectedIds.includes(r.id) ? 'border-primary ring-4 ring-blue-50' : 'border-transparent hover:border-slate-200'
+                    key={med.id}
+                    className={`bg-white rounded-2xl p-6 border-2 transition-all flex flex-col gap-4 relative group shadow-sm ${selectedIds.includes(med.id) ? 'border-primary ring-4 ring-blue-50' : 'border-transparent hover:border-slate-200'
                       }`}
                   >
-                    {selectedIds.includes(r.id) ? (
+                    {selectedIds.includes(med.id) ? (
                       <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" />
                         Seleccionado
@@ -159,13 +142,13 @@ export default function Recetas() {
                     )}
 
                     <div className="flex items-start gap-4">
-                      <div className={`w-16 h-16 rounded-xl flex items-center justify-center transition-colors ${selectedIds.includes(r.id) ? 'bg-primary text-white' : 'bg-slate-100 text-primary'
+                      <div className={`w-16 h-16 rounded-xl flex items-center justify-center transition-colors ${selectedIds.includes(med.id) ? 'bg-primary text-white' : 'bg-slate-100 text-primary'
                         }`}>
                         <Pill className="w-8 h-8" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-xl leading-tight">Receta</h3>
-                        {/*    <p className="text-slate-500 text-sm mt-1">{r.dose}</p> */}
+                        <h3 className="font-bold text-xl leading-tight">{med.codigo}</h3>
+                        <p className="text-slate-500 text-sm mt-1">{med.correo}</p>
                       </div>
                     </div>
 
@@ -174,33 +157,33 @@ export default function Recetas() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-slate-600">
                         <Stethoscope className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-semibold">{r.doctor_remitente}</span>
+                        <span className="text-sm font-semibold">{med.doctor_remitente}</span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-600">
                         <Building2 className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-semibold">{r.hospital_remitente}</span>
+                        <span className="text-sm font-semibold">{med.hospital_remitente}</span>
                       </div>
                     </div>
 
                     <div className="flex justify-between items-end mt-2">
                       <div className="flex flex-col">
                         <span className="text-[10px] uppercase text-slate-400 tracking-widest font-bold">Código</span>
-                        <span className="font-mono font-bold text-primary text-sm">{r.id}</span>
+                        <span className="font-mono font-bold text-primary text-sm">{med.codigo}</span>
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="text-[10px] uppercase text-slate-400 tracking-widest font-bold">Fecha</span>
-                        <span className="font-bold text-sm">{r.fecha}</span>
+                        <span className="font-bold text-sm">{med.fecha}</span>
                       </div>
                     </div>
 
                     <button
-                      onClick={() => toggleSelection(r.id)}
-                      className={`mt-4 w-full h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${selectedIds.includes(r.id)
+                      onClick={() => toggleSelection(med.id)}
+                      className={`mt-4 w-full h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${selectedIds.includes(med.id)
                         ? 'bg-slate-900 text-white hover:bg-black'
                         : 'bg-primary text-white hover:bg-primary-container shadow-md shadow-blue-200'
                         }`}
                     >
-                      {selectedIds.includes(r.id) ? (
+                      {selectedIds.includes(med.id) ? (
                         <>
                           <MinusCircle className="w-5 h-5" />
                           Quitar Selección
@@ -239,7 +222,7 @@ export default function Recetas() {
               className="space-y-8"
             >
               <button
-                onClick={() => setView('selection')}
+                onClick={() => setSection('selection')}
                 className="flex items-center gap-2 text-primary font-bold hover:opacity-80 transition-opacity"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -252,52 +235,46 @@ export default function Recetas() {
                     <h1 className="text-4xl font-extrabold tracking-tight">Resumen del Pedido</h1>
                     <span className="bg-primary text-white px-5 py-1.5 rounded-full font-bold text-sm">{selectedIds.length} Items</span>
                   </div>
-                  {/* console.log("selectedIds", recetas.map((r, i) => r.dosis.map(d => d.inventario.nombre_medicamento))) */}
-                  {selectedMedicines.map((med) => (
+
+                  {/* {selectedMedicines.map((med) => (
                     <motion.div
                       layout
                       key={med.id}
-
+                      className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex gap-6"
                     >
-                      {med.dosis.map((d, i) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex gap-6">
-                          <div className="w-32 h-32 rounded-xl overflow-hidden shrink-0">
-                            {/*  <img src={med.image} alt={med.dosis[0].inventario.nombre_medicamento} className="w-full h-full object-cover" /> */}
+                      <div className="w-32 h-32 rounded-xl overflow-hidden flex-shrink-0">
+                        <img src={med.image} alt={med.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-grow space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-2xl font-bold text-primary">{med.name}</h3>
+                            <p className="text-slate-500 font-medium">{med.dose}</p>
                           </div>
-                          <div className="grow space-y-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="text-2xl font-bold text-primary">{d.inventario.nombre_medicamento}</h3>
-                                <p className="text-slate-500 font-medium">{d.instrucciones}</p>
-                              </div>
-                              {/*  <span className="text-2xl font-bold text-primary">${med.price.toFixed(2)}</span> */}
-                            </div>
-                            <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-4 border-t border-slate-50">
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Doctor(a)</p>
-                                <p className="font-bold text-slate-800">{med.doctor_remitente}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Hospital</p>
-                                <p className="font-bold text-slate-800">{med.hospital_remitente}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">RUC Profesional</p>
-                                <p className="font-bold text-slate-800">{med.ruc_doctor_remitente || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Contacto</p>
-                                <p className="font-bold text-slate-800">{med.telefono_hospital || 'N/A'}</p>
-                              </div>
-                            </div>
+                          <span className="text-2xl font-bold text-primary">${med.price.toFixed(2)}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-4 border-t border-slate-50">
+                          <div>
+                            <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Doctor(a)</p>
+                            <p className="font-bold text-slate-800">{med.doctor}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Hospital</p>
+                            <p className="font-bold text-slate-800">{med.hospital}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">RUC Profesional</p>
+                            <p className="font-bold text-slate-800">{med.ruc || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Contacto</p>
+                            <p className="font-bold text-slate-800">{med.contact || 'N/A'}</p>
                           </div>
                         </div>
-                      ))}
-
-
+                      </div>
                     </motion.div>
                   ))}
-
+ */}
                   {/* Teleconsulta box */}
                   <div className="bg-secondary-container rounded-2xl p-8 border-l-8 border-primary flex items-start gap-6">
                     <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center text-primary shrink-0">
@@ -319,14 +296,14 @@ export default function Recetas() {
                 <div className="col-span-4 rounded-3xl bg-white border border-slate-200 p-8 shadow-xl sticky top-32">
                   <h2 className="text-2xl font-bold mb-8">Detalle de Pago</h2>
 
-                  <div className="space-y-5 mb-8">
+                  {/*  <div className="space-y-5 mb-8">
                     <div className="flex justify-between text-slate-500 font-medium">
                       <span>Subtotal</span>
-                      {/* <span>${subtotal.toFixed(2)}</span> */}
+                      <span>${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-slate-500 font-medium">
                       <span>Impuestos (IVA 12%)</span>
-                      {/* <span>${taxes.toFixed(2)}</span> */}
+                      <span>${taxes.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-slate-500 font-medium">
                       <span>Tarifa de Dispensación</span>
@@ -334,9 +311,9 @@ export default function Recetas() {
                     </div>
                     <div className="pt-5 border-t-2 border-slate-100 flex justify-between items-center">
                       <span className="font-bold text-lg">Total a Pagar</span>
-                      {/* <span className="text-3xl font-black text-primary">${total.toFixed(2)}</span> */}
+                      <span className="text-3xl font-black text-primary">${total.toFixed(2)}</span>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="bg-slate-50 rounded-2xl p-5 mb-8 border border-slate-100">
                     <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-2">Método de Pago Seleccionado</p>
@@ -363,43 +340,45 @@ export default function Recetas() {
       </main>
 
       {/* Footer / Summary Bar for Selection View */}
-      {view === 'selection' && (
-        <footer className="bg-white border-t border-slate-200 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-40 shrink-0">
-          <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-            <div className="flex items-center gap-12">
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Artículos Seleccionados</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-primary">{selectedIds.length}</span>
-                  <span className="text-xl font-bold text-slate-400">Receta{selectedIds.length !== 1 ? 's' : ''}</span>
+      {
+        view === 'selection' && (
+          <footer className="bg-white border-t border-slate-200 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] sticky bottom-0 z-40">
+            <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+              <div className="flex items-center gap-12">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Artículos Seleccionados</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-black text-primary">{selectedIds.length}</span>
+                    <span className="text-xl font-bold text-slate-400">Receta{selectedIds.length !== 1 ? 's' : ''}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="h-12 w-px bg-slate-100" />
-              <div className="flex flex-col">
+                <div className="h-12 w-px bg-slate-100" />
+                {/* <div className="flex flex-col">
                 <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Total a Pagar Estimado</span>
-                {/* <span className="text-2xl font-black text-slate-800">${subtotal > 0 ? (subtotal + (subtotal * 0.12) + 0.50).toFixed(2) : '0.00'}</span> */}
+                <span className="text-2xl font-black text-slate-800">${subtotal > 0 ? (subtotal + (subtotal * 0.12) + 0.50).toFixed(2) : '0.00'}</span>
+              </div> */}
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button className="px-8 h-16 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => setSection('summary')}
+                  disabled={selectedIds.length === 0}
+                  className="px-12 h-20 bg-primary text-white text-2xl font-black rounded-2xl shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-4 disabled:opacity-50 disabled:hover:scale-100"
+                >
+                  Continuar al Pago
+                  <ArrowRight className="w-8 h-8" />
+                </button>
               </div>
             </div>
-
-            <div className="flex items-center gap-4">
-              <button className="px-8 h-16 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                Cancelar
-              </button>
-              <button
-                onClick={() => setView('summary')}
-                disabled={selectedIds.length === 0}
-                className="px-12 h-20 bg-primary text-white text-2xl font-black rounded-2xl shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-4 disabled:opacity-50 disabled:hover:scale-100"
-              >
-                Continuar al Pago
-                <ArrowRight className="w-8 h-8" />
-              </button>
-            </div>
-          </div>
-        </footer>
-      )}
+          </footer>
+        )
+      }
 
       {/* Corporate Footer */}
-      <footer className="bg-slate-50 border-t border-slate-200 py-6 shrink-0">
+      <footer className="bg-slate-50 border-t border-slate-200 py-6">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400 opacity-80">
             © 2024 MEDVEND HEALTHCARE SYSTEMS. clinical grade security.
@@ -413,6 +392,77 @@ export default function Recetas() {
           </div>
         </div>
       </footer>
-    </div>
+    </div >
+
   );
 }
+{/* <div key={r.id || i} className="bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-100 flex flex-col gap-6">
+                  <div className="border-b-2 border-gray-100 pb-4">
+                    <h3 className="text-2xl font-bold text-text-primary">Receta de Dr(a). {r.doctor_remitente}</h3>
+                    <p className="text-xl text-text-secondary">Código: {r.codigo} | Fecha: {new Date(r.createdAt || r.fecha).toLocaleDateString()}</p>
+                    <p className="text-lg text-text-secondary">Hospital: {r.hospital_remitente} | Teléfono: {r.telefono_hospital}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {r.dosis && r.dosis.map((d, j) => (
+                      <div key={d.id || j} className="bg-background-default p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <h4 className="text-2xl font-bold text-primary-main mb-2">
+                          {d.inventario?.nombre_medicamento || 'Medicamento desconocido'}
+                        </h4>
+                        <p className="text-xl text-text-secondary mb-1">
+                          Instrucciones: <span className="font-bold text-text-primary">{d.instrucciones}</span>
+                        </p>
+                        <p className="text-xl text-text-secondary">
+                          Cantidad a despachar: <span className="font-bold text-text-primary">{d.cantidad}</span>
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div> */}
+
+
+{/* <div className="flex flex-col h-screen bg-background-default p-8">
+      <header className="flex justify-between items-center mb-8 border-b-4 border-gray-200 pb-4">
+        <h1 className="text-4xl font-bold text-primary-dark">Recetas Disponibles</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-2xl font-bold text-text-secondary">Cédula: {cedula}</span>
+          <button
+            onClick={logout}
+            className="bg-error-main text-white text-xl py-4 px-6 rounded-2xl shadow-md active:scale-95 transition-transform"
+          >
+            Salir
+          </button>
+        </div>
+      </header>
+
+      <main className="flex-1 flex flex-col gap-6 overflow-hidden">
+        {recetas.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <h2 className="text-3xl text-text-secondary">No hay recetas pendientes para esta cédula.</h2>
+          </div>
+        ) : (
+          <div className="flex-2 overflow-y-auto pr-4" style={{ touchAction: 'pan-y' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recetas.map((r, i) => (
+                <div key={r.id || i} className="bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-100 flex flex-col gap-6">
+
+                  <CardRecetas recipe={r} />
+                </div>
+
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {recetas.length > 0 && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={handleDespachar}
+            className="bg-success-main text-white text-4xl font-bold py-8 px-16 w-full rounded-2xl shadow-xl active:scale-95 transition-transform"
+          >
+            Ordenar y Despachar Todo
+          </button>
+        </div>
+      )}
+    </div> */}
