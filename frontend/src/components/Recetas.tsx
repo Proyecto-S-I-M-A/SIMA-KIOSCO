@@ -5,13 +5,14 @@
  */
 import { useSimaStore } from '../store/simaStore';
 import { useRecetas } from '../hooks/useRecetas';
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft,
-  HelpCircle,
-  Languages,
+
   ShieldCheck,
   Lock,
   CreditCard,
@@ -21,15 +22,14 @@ import {
   Video,
   Stethoscope,
   Building2,
-  QrCode,
   ArrowRight,
   Pill
 } from 'lucide-react';
-import type { Medication } from '../components/constants';
-import { MEDICATIONS } from '../components/constants';
+/* import type { Medication } from '../components/constants';
+import { MEDICATIONS } from '../components/constants'; */
 import Header from '../components/Header';
-import type { Receta } from '../hooks/useRecetas';
-type Step = 'identify' | 'select' | 'pay' | 'dispense';
+/* import type { Receta } from '../hooks/useRecetas'; */
+/* type Step = 'identify' | 'select' | 'pay' | 'dispense'; */
 
 export default function Recetas() {
 
@@ -37,8 +37,8 @@ export default function Recetas() {
   //Relevantes
 
   const logout = useSimaStore(state => state.logout);
-  const [medicamentosBase, setMedicamentosBase] = useState<Medication[]>(MEDICATIONS);
-  const [pastillitas, setPastillitas] = useState<Receta[]>(recetas);
+  /* const [medicamentosBase, setMedicamentosBase] = useState<Medication[]>(MEDICATIONS);
+  const [pastillitas, setPastillitas] = useState<Receta[]>(recetas); */
 
 
   // Inicia sin selección
@@ -57,6 +57,10 @@ export default function Recetas() {
     );
     ;
   };
+
+  const formatearFecha = (fecha: string) => {
+    return format(parseISO(fecha), "dd 'de' MMMM 'de' yyyy", { locale: es });
+  }
 
 
 
@@ -189,7 +193,8 @@ export default function Recetas() {
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="text-[10px] uppercase text-slate-400 tracking-widest font-bold">Fecha</span>
-                        <span className="font-bold text-sm">{r.fecha}</span>
+                        <span className="font-bold text-sm">{formatearFecha(r.fecha)}</span>
+
                       </div>
                     </div>
 
@@ -215,19 +220,7 @@ export default function Recetas() {
                   </div>
                 ))}
 
-                {/* Empty State / Help Card */}
-                <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
-                  <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
-                    <QrCode className="w-16 h-16 text-slate-200" />
-                  </div>
-                  <h4 className="font-bold text-slate-700 text-lg">¿Falta alguna prescripción?</h4>
-                  <p className="text-slate-400 text-sm mt-2 max-w-[200px]">
-                    Si no encuentra su receta, escanee el código QR directamente.
-                  </p>
-                  <button className="mt-8 px-8 py-3 bg-white text-primary border border-primary rounded-full font-bold hover:bg-primary hover:text-white transition-all">
-                    Escanear Código QR
-                  </button>
-                </div>
+
               </div>
             </motion.div>
           ) : (
@@ -298,22 +291,7 @@ export default function Recetas() {
                     </motion.div>
                   ))}
 
-                  {/* Teleconsulta box */}
-                  <div className="bg-secondary-container rounded-2xl p-8 border-l-8 border-primary flex items-start gap-6">
-                    <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center text-primary shrink-0">
-                      <Stethoscope className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h4 className="text-2xl font-bold text-slate-800">¿Necesita una receta nueva?</h4>
-                      <p className="text-slate-600 mt-1 max-w-lg">
-                        Si su medicamento requiere validación adicional o ha expirado, puede solicitar una teleconsulta inmediata.
-                      </p>
-                      <button className="mt-6 bg-primary text-white px-8 py-3.5 rounded-xl font-bold flex items-center gap-3 hover:bg-primary-container transition-all shadow-lg shadow-blue-100">
-                        <span>Solicitar Receta Médica</span>
-                        <Video className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
+
                 </div>
 
                 <div className="col-span-4 rounded-3xl bg-white border border-slate-200 p-8 shadow-xl sticky top-32">
@@ -368,29 +346,26 @@ export default function Recetas() {
           <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
             <div className="flex items-center gap-12">
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Artículos Seleccionados</span>
+                <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Recetas Seleccionadas</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-5xl font-black text-primary">{selectedIds.length}</span>
                   <span className="text-xl font-bold text-slate-400">Receta{selectedIds.length !== 1 ? 's' : ''}</span>
                 </div>
               </div>
               <div className="h-12 w-px bg-slate-100" />
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Total a Pagar Estimado</span>
-                {/* <span className="text-2xl font-black text-slate-800">${subtotal > 0 ? (subtotal + (subtotal * 0.12) + 0.50).toFixed(2) : '0.00'}</span> */}
-              </div>
+
             </div>
 
             <div className="flex items-center gap-4">
-              <button className="px-8 h-16 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+              {/* <button className="px-8 h-16 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors">
                 Cancelar
-              </button>
+              </button> */}
               <button
                 onClick={() => setView('summary')}
                 disabled={selectedIds.length === 0}
                 className="px-12 h-20 bg-primary text-white text-2xl font-black rounded-2xl shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-4 disabled:opacity-50 disabled:hover:scale-100"
               >
-                Continuar al Pago
+                Continuar
                 <ArrowRight className="w-8 h-8" />
               </button>
             </div>
@@ -416,3 +391,36 @@ export default function Recetas() {
     </div>
   );
 }
+
+
+{/* Empty State / Help Card */ }
+{/* <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
+                  <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
+                    <QrCode className="w-16 h-16 text-slate-200" />
+                  </div>
+                  <h4 className="font-bold text-slate-700 text-lg">¿Falta alguna prescripción?</h4>
+                  <p className="text-slate-400 text-sm mt-2 max-w-[200px]">
+                    Si no encuentra su receta, escanee el código QR directamente.
+                  </p>
+                  <button className="mt-8 px-8 py-3 bg-white text-primary border border-primary rounded-full font-bold hover:bg-primary hover:text-white transition-all">
+                    Escanear Código QR
+                  </button>
+                </div> */}
+
+
+{/* Teleconsulta box */ }
+<div className="bg-secondary-container rounded-2xl p-8 border-l-8 border-primary flex items-start gap-6">
+  <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center text-primary shrink-0">
+    <Stethoscope className="w-8 h-8" />
+  </div>
+  <div>
+    <h4 className="text-2xl font-bold text-slate-800">¿Necesita una receta nueva?</h4>
+    <p className="text-slate-600 mt-1 max-w-lg">
+      Si su medicamento requiere validación adicional o ha expirado, puede solicitar una teleconsulta inmediata.
+    </p>
+    <button className="mt-6 bg-primary text-white px-8 py-3.5 rounded-xl font-bold flex items-center gap-3 hover:bg-primary-container transition-all shadow-lg shadow-blue-100">
+      <span>Solicitar Receta Médica</span>
+      <Video className="w-5 h-5" />
+    </button>
+  </div>
+</div>
