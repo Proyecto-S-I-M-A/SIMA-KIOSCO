@@ -2,7 +2,7 @@ import { ShieldCheck, HelpCircle, Languages } from "lucide-react";
 import { useState } from "react";
 
 export default function Header() {
-    const [view, setView] = useState<'selection' | 'summary'>('selection');
+    const [view] = useState<'selection' | 'summary'>('selection');
 
     return (
         <header className="bg-white border-b-2 border-slate-200 sticky top-0 z-50">
@@ -19,7 +19,7 @@ export default function Header() {
 
                 {view === 'summary' && (
                     <nav className="hidden md:flex gap-8 items-center">
-                        {['Identify', 'Select', 'Pay', 'Dispense'].map((s, i) => (
+                        {['Identify', 'Select', 'Pay', 'Dispense'].map((s) => (
                             <span
                                 key={s}
                                 className={`text-sm font-bold tracking-tight transition-colors ${s === 'Pay' ? 'text-primary border-b-2 border-primary pb-1' : 'text-slate-400'

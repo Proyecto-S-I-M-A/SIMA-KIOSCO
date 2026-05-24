@@ -57,7 +57,7 @@ export function useRecetas() {
           `http://localhost:3000/api/v1/recetas/dosis/cliente/${cedula}`,
           {
             headers: {
-              /* 'Authorization': `Bearer ${token}`, */
+              'Authorization': `Bearer ${token}`,
               Accept: "application/json",
             },
           },
@@ -76,10 +76,10 @@ export function useRecetas() {
         setLoading(false);
       }
     };
-    if (cedula /*  && token */) {
+    if (cedula && token) {
       fetchRecetas();
     }
-  }, [cedula /* ,token */]);
+  }, [cedula, token]);
 
   return { recetas, loading, error };
 }

@@ -12,13 +12,13 @@ interface PatientIdentifyProps {
     setCedulaInput: (val: string) => void;
 }
 
-export default function PatientIdentify({ 
-    onBack, 
-    onScan, 
-    onManualSubmit, 
-    error, 
-    cedulaInput, 
-    setCedulaInput 
+export default function PatientIdentify({
+    onBack,
+    onScan,
+    onManualSubmit,
+    error,
+    cedulaInput,
+    setCedulaInput
 }: PatientIdentifyProps) {
     const [method, setMethod] = useState<'scan' | 'id' | null>(null);
 
@@ -47,7 +47,7 @@ export default function PatientIdentify({
                     <p className="text-text-secondary">Verifique su identidad utilizando uno de los siguientes métodos.</p>
                 </div>
 
-                <div className="card-med p-10 bg-white">
+                <div className="card-med p-8 bg-white border-t-4 border-t-primary-med">
                     {!method ? (
                         <div className="grid grid-cols-1 gap-4">
                             <button
@@ -102,7 +102,7 @@ export default function PatientIdentify({
                                         />
                                     </div>
                                     {error && <p className="text-error-main text-xl font-bold mb-6 text-center">{error}</p>}
-                                    <button 
+                                    <button
                                         onClick={() => onManualSubmit(cedulaInput)}
                                         className="w-full button-med py-4 bg-primary-med text-white text-lg hover:bg-primary-dark"
                                     >

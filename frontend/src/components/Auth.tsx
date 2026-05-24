@@ -35,7 +35,11 @@ export default function Auth() {
   const handleScan = (result: any) => {
     if (result && result.length > 0 && result[0].rawValue) {
       const isNorma = usePatientScanner(result[0].rawValue);
-      handleValidCedula(isNorma);
+      if (isNorma) {
+        handleValidCedula(isNorma);
+      } else {
+        setError('Formato de código QR no válido');
+      }
     }
   };
 
@@ -75,8 +79,8 @@ export default function Auth() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <PatientIdentify 
-              onBack={goToLogin} 
+            <PatientIdentify
+              onBack={goToLogin}
               onScan={handleScan}
               onManualSubmit={handleValidCedula}
               error={error}
