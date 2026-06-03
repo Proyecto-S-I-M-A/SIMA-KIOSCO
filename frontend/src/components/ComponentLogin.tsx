@@ -1,5 +1,5 @@
 
-import { User, BadgeCheck, Shield } from 'lucide-react';
+import { User, Shield } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface LoginProps {
@@ -26,7 +26,7 @@ export default function ComponentLogin({ onSelectRole }: LoginProps) {
         </p>
       </motion.header>
 
-      <main className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+      <main className="w-full max-w-md mx-auto">
         {/* Patient Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -47,31 +47,6 @@ export default function ComponentLogin({ onSelectRole }: LoginProps) {
             <div className="mt-auto">
               <span className="button-med inline-flex items-center justify-center w-full py-4 bg-primary-med text-white text-lg hover:bg-primary-dark">
                 Iniciar como Paciente
-              </span>
-            </div>
-          </button>
-        </motion.div>
-
-        {/* Staff Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <button
-            onClick={() => onSelectRole('staff')}
-            className="group w-full card-med p-8 hover:border-secondary-pharma transition-all duration-300 text-center flex flex-col"
-          >
-            <div className="w-20 h-20 bg-secondary-light/10 text-secondary-pharma rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-secondary-pharma group-hover:text-white transition-colors">
-              <BadgeCheck size={40} />
-            </div>
-            <h3 className="text-2xl font-bold text-text-primary mb-3">Persona Autorizada</h3>
-            <p className="text-text-secondary mb-8 leading-relaxed">
-              Acceso exclusivo para personal médico, farmacéutico y técnico de mantenimiento del sistema.
-            </p>
-            <div className="mt-auto">
-              <span className="button-med inline-flex items-center justify-center w-full py-4 bg-secondary-pharma text-white text-lg hover:bg-secondary-dark">
-                Acceso Profesional
               </span>
             </div>
           </button>

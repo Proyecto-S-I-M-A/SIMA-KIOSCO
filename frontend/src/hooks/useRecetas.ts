@@ -12,6 +12,7 @@ export interface Inventario {
   updatedAt: string;
   id_maquina: string;
   MaquinaId: string | null;
+  codigo: string;
 }
 
 export interface Dosis {
@@ -23,7 +24,9 @@ export interface Dosis {
   createdAt: string;
   updatedAt: string;
   RecetumId: string | null;
+  codigo: string;
   inventario: Inventario;
+
 }
 
 export interface Receta {
@@ -48,7 +51,7 @@ export function useRecetas() {
   const [recetas, setRecetas] = useState<Receta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const token = import.meta.env.VITE_TOKEN_KIOSKO;
+  /* const token = import.meta.env.VITE_TOKEN_KIOSKO; */
   useEffect(() => {
     console.log("cedula", cedula);
     const fetchRecetas = async () => {
@@ -57,7 +60,7 @@ export function useRecetas() {
           `http://localhost:3000/api/v1/recetas/dosis/cliente/${cedula}`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              /* 'Authorization': `Bearer ${token}`, */
               Accept: "application/json",
             },
           },
@@ -71,15 +74,20 @@ export function useRecetas() {
 
         setRecetas(data.recetas || data);
       } catch (err: any) {
-        setError(err.message || "Error de conexión");
+        const msg = err.message || "";
+        if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("network error") || msg.toLowerCase().includes("fetch")) {
+          setError("No hay sistema");
+        } else {
+          setError(msg || "No hay sistema");
+        }
       } finally {
         setLoading(false);
       }
     };
-    if (cedula && token) {
+    if (cedula /*  && token */) {
       fetchRecetas();
     }
-  }, [cedula, token]);
+  }, [cedula /* , token */]);
 
   return { recetas, loading, error };
 }

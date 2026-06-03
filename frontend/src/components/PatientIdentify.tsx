@@ -23,12 +23,12 @@ export default function PatientIdentify({
     const [method, setMethod] = useState<'scan' | 'id' | null>(null);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background-med">
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background-med relative">
             <motion.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={onBack}
-                className="absolute top-8 left-8 flex items-center gap-2 text-primary-med font-semibold hover:text-primary-dark transition-colors"
+                className="self-start md:absolute md:top-8 md:left-8 mb-6 md:mb-0 flex items-center gap-2 text-primary-med font-semibold hover:text-primary-dark transition-colors"
             >
                 <ArrowLeft size={20} />
                 Regresar al Inicio

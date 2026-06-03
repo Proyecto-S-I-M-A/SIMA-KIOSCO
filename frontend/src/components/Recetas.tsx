@@ -5,17 +5,15 @@
  */
 import { useSimaStore } from '../store/simaStore';
 import { useRecetas } from '../hooks/useRecetas';
-import { useState } from 'react';
+import { useVendingWebSocket } from '../hooks/useVendingWebSocket';
+import { useState, useEffect, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft,
-
   ShieldCheck,
-  Lock,
-  CreditCard,
   CheckCircle2,
   PlusCircle,
   MinusCircle,
@@ -23,7 +21,11 @@ import {
   Stethoscope,
   Building2,
   ArrowRight,
-  Pill
+  Pill,
+  X,
+  Loader2,
+  Terminal,
+  AlertTriangle
 } from 'lucide-react';
 /* import type { Medication } from '../components/constants';
 import { MEDICATIONS } from '../components/constants'; */
@@ -48,7 +50,6 @@ export default function Recetas() {
   const selectedMedicines = recetas.filter(m => selectedIds.includes(m.id));
   /* const subtotal = selectedMedicines.reduce((acc, curr) => acc + curr.price, 0);
   const taxes = subtotal * 0.12; */
-  const dispensingFee = 0.50;
   /*   const total = subtotal + taxes + dispensingFee; */
 
   const toggleSelection = (id: string) => {
@@ -62,7 +63,179 @@ export default function Recetas() {
     return format(parseISO(fecha), "dd 'de' MMMM 'de' yyyy", { locale: es });
   }
 
+  // State variables for WebSocket and Dispensing logic
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [dispenseQueue, setDispenseQueue] = useState<{ id: string; name: string }[]>([]);
+  const [currentQueueIndex, setCurrentQueueIndex] = useState(0);
+  const [dispensingItemName, setDispensingItemName] = useState("");
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+  const [logs, setLogs] = useState<{ time: string; text: string; type: string }[]>([]);
+  const [currentStep, setCurrentStep] = useState<'requested' | 'processing' | 'dispensing' | 'delivered' | 'error' | null>(null);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [failedSteps, setFailedSteps] = useState<string[]>([]);
 
+  // Refs for tracking mutable states in async websocket callbacks
+  const activeOrderIdRef = useRef<string | null>(null);
+  const queueRef = useRef<{ id: string; name: string }[]>([]);
+  const queueIndexRef = useRef<number>(0);
+  const logEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll logs
+  useEffect(() => {
+    if (logEndRef.current) {
+      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs]);
+
+  // Append a console log entry
+  const appendLog = (text: string, type: string = "system") => {
+    const now = new Date();
+    const timeStr = now.toTimeString().split(' ')[0];
+    setLogs(prev => [...prev, { time: timeStr, text, type }]);
+  };
+
+  // Start dispensing a specific item in the queue
+  const startDispensingItem = async (index: number) => {
+    if (index >= queueRef.current.length) return;
+
+    queueIndexRef.current = index;
+    setCurrentQueueIndex(index);
+
+    const item = queueRef.current[index];
+    setDispensingItemName(item.name);
+    setActiveOrderId("Creando orden...");
+    activeOrderIdRef.current = "creating";
+
+    // Reset stepper state
+    setCurrentStep("requested");
+    setCompletedSteps([]);
+    setFailedSteps([]);
+    setLogs([]); // Clear logs for the new item
+
+    appendLog(`[SYS] Solicitando dispensado de: <strong>${item.name}</strong>...`, "system");
+
+    try {
+      const response = await fetch("http://localhost:8000/api/dispense", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          product_id: item.id,
+          product_name: item.name
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Código HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const orderId = data.order_id;
+      console.log("Número de orden del pedido (Order ID):", orderId);
+      setActiveOrderId(orderId);
+      activeOrderIdRef.current = orderId;
+      appendLog(`[SYS] Backend aceptó la orden. MQTT publicado.`, "system");
+
+    } catch (err: any) {
+      console.error("Fetch error:", err);
+      appendLog(`[ERROR] Fallo al iniciar orden: ${err.message}`, "error");
+      setCurrentStep("error");
+      setFailedSteps(["step-requested"]);
+    }
+  };
+
+  // Handle WebSocket updates
+  const handleRealTimeStatus = (data: any) => {
+    // Verify if it's the current order we are tracking
+    if (data.order_id !== activeOrderIdRef.current) {
+      return;
+    }
+
+    const status = data.status;
+    const message = data.message || "";
+
+    switch (status) {
+      case "requested":
+        appendLog(`[MQTT] backend -> broker: Solicitud de dispensado publicada.`, "mqtt");
+        setCurrentStep("processing");
+        setCompletedSteps(["step-requested"]);
+        break;
+
+      case "dispensing":
+        appendLog(`[MQTT] máquina -> backend: ${message}`, "mqtt");
+        setCurrentStep("dispensing");
+        setCompletedSteps(["step-requested", "step-processing"]);
+        break;
+
+      case "delivered":
+        appendLog(`[WEBHOOK] máquina -> backend: ${message}`, "webhook");
+        setCurrentStep("delivered");
+        setCompletedSteps(["step-requested", "step-processing", "step-dispensing", "step-delivered"]);
+        appendLog(`[SYS] ¡Dispensado con éxito! Que disfrute su producto.`, "success");
+
+        // Schedule next queue item if any
+        const nextIndex = queueIndexRef.current + 1;
+        if (nextIndex < queueRef.current.length) {
+          appendLog(`[SYS] Preparando para dispensar el siguiente medicamento en 3 segundos...`, "system");
+          setTimeout(() => {
+            startDispensingItem(nextIndex);
+          }, 3000);
+        } else {
+          appendLog(`[SYS] Todos los medicamentos han sido entregados con éxito.`, "success");
+        }
+        break;
+
+      case "error":
+        appendLog(`[ERROR] Fallo del simulador: ${message}`, "error");
+        setCurrentStep("error");
+        setFailedSteps(["step-dispensing", "step-delivered"]);
+        break;
+
+      default:
+        appendLog(`[INFO] Actualización: ${message}`, "system");
+        break;
+    }
+  };
+
+  // Ref to always hold the latest handleRealTimeStatus handler
+  const handleRealTimeStatusRef = useRef(handleRealTimeStatus);
+  useEffect(() => {
+    handleRealTimeStatusRef.current = handleRealTimeStatus;
+  });
+
+  // Connect to WebSocket Server using custom hook
+  const { isConnected: wsConnected } = useVendingWebSocket(
+    "ws://localhost:8000/ws",
+    (data) => {
+      handleRealTimeStatusRef.current(data);
+    }
+  );
+
+  const HandleMedicamentos = () => {
+    if (!wsConnected) {
+      alert("Error: No hay conexión con el servidor backend. Asegúrate de iniciar main.py.");
+      return;
+    }
+
+    const items = selectedMedicines.flatMap(receta =>
+      receta.dosis.map(d => ({
+        id: d.inventario.codigo || d.inventario.id,
+        name: d.inventario.nombre_medicamento
+      }))
+    );
+
+    if (items.length === 0) {
+      alert("Por favor, seleccione al menos una receta.");
+      return;
+    }
+
+    console.log("Medicamentos seleccionados para dispensar:", items);
+    queueRef.current = items;
+    setDispenseQueue(items);
+    setIsDrawerOpen(true);
+    startDispensingItem(0);
+  };
 
 
   if (loading) {
@@ -94,34 +267,37 @@ export default function Recetas() {
       {/* Header */}
       <Header />
 
-      {/* Progress Bar for Selection View */}
-      {view === 'selection' && (
-        <div className="bg-white border-b border-slate-100 px-6 py-4">
+      {/* Progress Bar */}
+      <div className="bg-white border-b border-slate-100 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Step 1: Identificar */}
+          <div className="flex items-center gap-3 text-primary">
+            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">1</div>
+            <span className="font-bold text-sm">Identificar</span>
+          </div>
+          <div className="flex-1 h-0.5 bg-primary mx-4" />
 
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Step 2: Seleccionar */}
+          <div className="flex items-center gap-3 text-primary">
+            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">2</div>
+            <span className="font-bold text-sm">Seleccionar</span>
+          </div>
+          <div className={`flex-1 h-0.5 mx-4 ${view !== 'selection' ? 'bg-primary' : 'bg-slate-200'}`} />
 
-            <div className="flex items-center gap-3 text-primary">
-              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">1</div>
-              <span className="font-bold text-sm">Identificar</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-primary mx-4" />
-            <div className="flex items-center gap-3 text-primary">
-              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">2</div>
-              <span className="font-bold text-sm">Seleccionar</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-slate-200 mx-4" />
-            <div className="flex items-center gap-3 text-slate-400">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-sm">3</div>
-              <span className="font-bold text-sm">Pagar</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-slate-200 mx-4" />
-            <div className="flex items-center gap-3 text-slate-400">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-sm">4</div>
-              <span className="font-bold text-sm">Dispensar</span>
-            </div>
+          {/* Step 3: Confirmar Pedido */}
+          <div className={`flex items-center gap-3 ${view !== 'selection' ? 'text-primary' : 'text-slate-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${view !== 'selection' ? 'bg-primary text-white' : 'bg-slate-200'}`}>3</div>
+            <span className="font-bold text-sm">Confirmar Pedido</span>
+          </div>
+          <div className={`flex-1 h-0.5 mx-4 ${isDrawerOpen ? 'bg-primary' : 'bg-slate-200'}`} />
+
+          {/* Step 4: Dispensar */}
+          <div className={`flex items-center gap-3 ${isDrawerOpen ? 'text-primary' : 'text-slate-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${isDrawerOpen ? 'bg-primary text-white ring-4 ring-primary/20 animate-pulse' : 'bg-slate-200'}`}>4</div>
+            <span className="font-bold text-sm">Dispensar</span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
       <main className="grow overflow-y-auto max-w-7xl mx-auto w-full px-6 py-10">
@@ -223,7 +399,7 @@ export default function Recetas() {
 
               </div>
             </motion.div>
-          ) : (
+          ) : !isDrawerOpen ? (
             <motion.div
               key="summary"
               initial={{ opacity: 0, x: 20 }}
@@ -239,99 +415,219 @@ export default function Recetas() {
                 <span>Volver a la selección</span>
               </button>
 
-              <div className="grid grid-cols-12 gap-8 items-start">
-                <div className="col-span-8 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h1 className="text-4xl font-extrabold tracking-tight">Resumen del Pedido</h1>
-                    <span className="bg-primary text-white px-5 py-1.5 rounded-full font-bold text-sm">{selectedIds.length} Items</span>
-                  </div>
-                  {/* console.log("selectedIds", recetas.map((r, i) => r.dosis.map(d => d.inventario.nombre_medicamento))) */}
-                  {selectedMedicines.map((med) => (
-                    <motion.div
-                      layout
-                      key={med.id}
-
-                    >
-                      {med.dosis.map((d, i) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex gap-6">
-                          <div className="w-32 h-32 rounded-xl overflow-hidden shrink-0">
-                            {/*  <img src={med.image} alt={med.dosis[0].inventario.nombre_medicamento} className="w-full h-full object-cover" /> */}
-                          </div>
-                          <div className="grow space-y-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="text-2xl font-bold text-primary">{d.inventario.nombre_medicamento}</h3>
-                                <p className="text-slate-500 font-medium">{d.instrucciones}</p>
-                              </div>
-                              {/*  <span className="text-2xl font-bold text-primary">${med.price.toFixed(2)}</span> */}
+              <div className="max-w-4xl mx-auto space-y-6 pb-28">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-4xl font-extrabold tracking-tight">Resumen del Pedido</h1>
+                  <span className="bg-primary text-white px-5 py-1.5 rounded-full font-bold text-sm">{selectedIds.length} Items</span>
+                </div>
+                {/* console.log("selectedIds", recetas.map((r, i) => r.dosis.map(d => d.inventario.nombre_medicamento))) */}
+                {selectedMedicines.map((med) => (
+                  <motion.div
+                    layout
+                    key={med.id}
+                  >
+                    {med.dosis.map((d, i) => (
+                      <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex gap-6">
+                        <div className="w-32 h-32 rounded-xl overflow-hidden shrink-0 bg-slate-50 flex items-center justify-center">
+                          <Pill className="w-12 h-12 text-primary" />
+                        </div>
+                        <div className="grow space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="text-2xl font-bold text-primary">{d.inventario.nombre_medicamento}</h3>
+                              <p className="text-slate-500 font-medium">{d.instrucciones}</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-4 border-t border-slate-50">
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Doctor(a)</p>
-                                <p className="font-bold text-slate-800">{med.doctor_remitente}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Hospital</p>
-                                <p className="font-bold text-slate-800">{med.hospital_remitente}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">RUC Profesional</p>
-                                <p className="font-bold text-slate-800">{med.ruc_doctor_remitente || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Contacto</p>
-                                <p className="font-bold text-slate-800">{med.telefono_hospital || 'N/A'}</p>
-                              </div>
+                            {/*  <span className="text-2xl font-bold text-primary">${med.price.toFixed(2)}</span> */}
+                          </div>
+                          <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-4 border-t border-slate-50">
+                            <div>
+                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Doctor(a)</p>
+                              <p className="font-bold text-slate-800">{med.doctor_remitente}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Hospital</p>
+                              <p className="font-bold text-slate-800">{med.hospital_remitente}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">RUC Profesional</p>
+                              <p className="font-bold text-slate-800">{med.ruc_doctor_remitente || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Contacto</p>
+                              <p className="font-bold text-slate-800">{med.telefono_hospital || 'N/A'}</p>
                             </div>
                           </div>
                         </div>
-                      ))}
+                      </div>
+                    ))}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="dispensing-screen"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="max-w-4xl mx-auto space-y-8"
+            >
+              <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+                <div>
+                  <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Progreso de Entrega</h1>
+                  <p className="text-slate-500 font-medium mt-1">Por favor, espere mientras se entregan sus medicamentos.</p>
+                </div>
+                {/* WebSocket Status Indicator */}
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-xs font-bold text-slate-700">
+                  <span className={`w-2.5 h-2.5 rounded-full ${wsConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                  <span>{wsConnected ? 'Conectado a Backend' : 'Desconectado'}</span>
+                </div>
+              </div>
 
+              {/* Grid: Stepper on Left, Event Terminal Log on Right */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+                {/* Left Side: Stepper and Current Item details */}
+                <div className="md:col-span-6 bg-white rounded-3xl border border-slate-200 p-8 shadow-md flex flex-col justify-between">
+                  <div className="space-y-6">
+                    {/* Current Item Details */}
+                    <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
+                        {currentStep === 'delivered' ? (
+                          <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                        ) : currentStep === 'error' ? (
+                          <AlertTriangle className="w-6 h-6 text-red-500" />
+                        ) : (
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        )}
+                      </div>
+                      <div className="grow min-w-0">
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
+                          Dispensando {currentQueueIndex + 1} de {dispenseQueue.length}
+                        </span>
+                        <h4 className="text-base font-bold text-slate-800 leading-tight truncate">{dispensingItemName}</h4>
+                        <p className="text-xs font-mono text-slate-500 mt-0.5 truncate">ID: {activeOrderId}</p>
+                      </div>
+                    </div>
 
-                    </motion.div>
-                  ))}
+                    {/* Progress Stepper */}
+                    <div className="space-y-4 pt-2">
+                      {[
+                        {
+                          id: 'step-requested',
+                          title: 'Solicitud Registrada',
+                          desc: 'Enviada por HTTP POST al servidor',
+                        },
+                        {
+                          id: 'step-processing',
+                          title: 'Comando MQTT Publicado',
+                          desc: 'Enviando orden a la expendedora',
+                        },
+                        {
+                          id: 'step-dispensing',
+                          title: 'Dispensado Mecánico',
+                          desc: 'Girando motor de la bandeja física',
+                        },
+                        {
+                          id: 'step-delivered',
+                          title: 'Producto Entregado',
+                          desc: 'Confirmado por Webhook de caída',
+                        },
+                      ].map((s, idx) => {
+                        const stepCode = s.id;
+                        const isActive = currentStep === stepCode.replace('step-', '');
+                        const isCompleted = completedSteps.includes(stepCode);
+                        const isFailed = failedSteps.includes(stepCode);
 
+                        let circleClass = 'bg-slate-100 text-slate-400';
+                        let icon = <span className="text-sm font-bold">{idx + 1}</span>;
 
+                        if (isCompleted) {
+                          circleClass = 'bg-emerald-500 text-white';
+                          icon = <CheckCircle2 className="w-4 h-4" />;
+                        } else if (isFailed) {
+                          circleClass = 'bg-red-500 text-white';
+                          icon = <X className="w-4 h-4" />;
+                        } else if (isActive) {
+                          circleClass = 'bg-primary text-white ring-4 ring-primary/20 animate-pulse';
+                          icon = <Loader2 className="w-4 h-4 animate-spin" />;
+                        }
+
+                        return (
+                          <div key={s.id} className="flex flex-col">
+                            <div className="flex items-start gap-4">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${circleClass}`}>
+                                {icon}
+                              </div>
+                              <div>
+                                <h5 className={`font-bold text-sm ${isActive ? 'text-primary' : isFailed ? 'text-red-500' : isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>{s.title}</h5>
+                                <p className="text-xs text-slate-500 leading-normal">{s.desc}</p>
+                              </div>
+                            </div>
+                            {idx < 3 && (
+                              <div className="w-0.5 h-6 bg-slate-200 ml-4 my-1" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="col-span-4 rounded-3xl bg-white border border-slate-200 p-8 shadow-xl sticky top-32">
-                  <h2 className="text-2xl font-bold mb-8">Detalle de Pago</h2>
-
-                  <div className="space-y-5 mb-8">
-                    <div className="flex justify-between text-slate-500 font-medium">
-                      <span>Subtotal</span>
-                      {/* <span>${subtotal.toFixed(2)}</span> */}
+                {/* Right Side: Log Console and Actions */}
+                <div className="md:col-span-6 flex flex-col justify-between space-y-6">
+                  {/* Log Console */}
+                  <div className="border border-slate-800 bg-slate-950 rounded-3xl overflow-hidden shadow-inner flex flex-col grow h-72">
+                    <div className="bg-slate-900 px-5 py-3 flex items-center justify-between border-b border-slate-800">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-400 font-mono">
+                        <Terminal className="w-4 h-4 text-cyan-400" />
+                        <span>Terminal de Eventos</span>
+                      </div>
+                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
                     </div>
-                    <div className="flex justify-between text-slate-500 font-medium">
-                      <span>Impuestos (IVA 12%)</span>
-                      {/* <span>${taxes.toFixed(2)}</span> */}
-                    </div>
-                    <div className="flex justify-between text-slate-500 font-medium">
-                      <span>Tarifa de Dispensación</span>
-                      <span>${dispensingFee.toFixed(2)}</span>
-                    </div>
-                    <div className="pt-5 border-t-2 border-slate-100 flex justify-between items-center">
-                      <span className="font-bold text-lg">Total a Pagar</span>
-                      {/* <span className="text-3xl font-black text-primary">${total.toFixed(2)}</span> */}
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-2xl p-5 mb-8 border border-slate-100">
-                    <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-2">Método de Pago Seleccionado</p>
-                    <div className="flex items-center gap-3 text-slate-800 font-bold">
-                      <CreditCard className="w-6 h-6 text-primary" />
-                      <span>Visa terminada en •••• 4242</span>
+                    <div className="p-5 flex-1 overflow-y-auto font-mono text-xs space-y-2 text-slate-300">
+                      {logs.map((log, index) => (
+                        <div key={index} className={`leading-relaxed ${
+                          log.type === 'mqtt' ? 'text-cyan-400' :
+                          log.type === 'webhook' ? 'text-fuchsia-400' :
+                          log.type === 'success' ? 'text-emerald-400' :
+                          log.type === 'error' ? 'text-red-400' :
+                          'text-slate-300'
+                        }`}>
+                          <span className="text-slate-500 mr-2">[{log.time}]</span>
+                          <span dangerouslySetInnerHTML={{ __html: log.text }} />
+                        </div>
+                      ))}
+                      <div ref={logEndRef} />
                     </div>
                   </div>
 
-                  <button className="w-full bg-primary-container text-white py-6 rounded-2xl font-black text-xl flex items-center justify-center gap-3 shadow-xl shadow-blue-200 hover:scale-[1.02] active:scale-95 transition-all">
-                    CONFIRMAR PEDIDO
-                    <Lock className="w-6 h-6" />
-                  </button>
-
-                  <div className="mt-8 flex items-center justify-center gap-2 text-slate-400 text-sm font-bold">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Transacción Encriptada de Grado Clínico</span>
+                  {/* Action Buttons */}
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                    {currentStep === 'delivered' || currentStep === 'error' ? (
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => {
+                            setIsDrawerOpen(false);
+                            setSelectedIds([]);
+                            setView('selection');
+                          }}
+                          className="w-full py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl text-sm font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all text-center"
+                        >
+                          Retirar Más
+                        </button>
+                        <button
+                          onClick={logout}
+                          className="w-full py-4 bg-primary hover:bg-primary-dark text-white rounded-2xl text-sm font-bold shadow-md hover:scale-[1.02] active:scale-95 transition-all text-center"
+                        >
+                          Finalizar y Salir
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-3 text-slate-400 py-3 text-sm font-bold">
+                        <ShieldCheck className="w-5 h-5 text-primary animate-pulse" />
+                        <span>Espere a que finalice el proceso</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -343,30 +639,54 @@ export default function Recetas() {
       {/* Footer / Summary Bar for Selection View */}
       {view === 'selection' && (
         <footer className="bg-white border-t border-slate-200 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-40 shrink-0">
-          <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-            <div className="flex items-center gap-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-6 sm:gap-12">
               <div className="flex flex-col">
                 <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Recetas Seleccionadas</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-primary">{selectedIds.length}</span>
-                  <span className="text-xl font-bold text-slate-400">Receta{selectedIds.length !== 1 ? 's' : ''}</span>
+                  <span className="text-4xl sm:text-5xl font-black text-primary">{selectedIds.length}</span>
+                  <span className="text-lg sm:text-xl font-bold text-slate-400">Receta{selectedIds.length !== 1 ? 's' : ''}</span>
                 </div>
               </div>
-              <div className="h-12 w-px bg-slate-100" />
-
+              <div className="hidden sm:block h-12 w-px bg-slate-100" />
             </div>
 
-            <div className="flex items-center gap-4">
-              {/* <button className="px-8 h-16 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                Cancelar
-              </button> */}
+            <div className="flex items-center w-full sm:w-auto gap-4">
               <button
                 onClick={() => setView('summary')}
                 disabled={selectedIds.length === 0}
-                className="px-12 h-20 bg-primary text-white text-2xl font-black rounded-2xl shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-4 disabled:opacity-50 disabled:hover:scale-100"
+                className="w-full sm:w-auto px-8 sm:px-12 h-16 sm:h-20 bg-primary text-white text-xl sm:text-2xl font-black rounded-2xl shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:hover:scale-100"
               >
                 Continuar
-                <ArrowRight className="w-8 h-8" />
+                <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            </div>
+          </div>
+        </footer>
+      )}
+
+      {/* Footer / Summary Bar for Summary View */}
+      {view === 'summary' && !isDrawerOpen && (
+        <footer className="bg-white border-t border-slate-200 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-40 shrink-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-6 sm:gap-12">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase text-slate-400 tracking-widest font-black">Recetas Seleccionadas</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl sm:text-5xl font-black text-primary">{selectedIds.length}</span>
+                  <span className="text-lg sm:text-xl font-bold text-slate-400">Receta{selectedIds.length !== 1 ? 's' : ''}</span>
+                </div>
+              </div>
+              <div className="hidden sm:block h-12 w-px bg-slate-100" />
+            </div>
+
+            <div className="flex items-center w-full sm:w-auto gap-4">
+              <button
+                onClick={() => { HandleMedicamentos(); }}
+                className="w-full sm:w-auto px-8 sm:px-12 h-16 sm:h-20 bg-primary text-white text-xl sm:text-2xl font-black rounded-2xl shadow-2xl shadow-blue-200 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-4"
+              >
+                Confirmar Pedido
+                <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8" />
               </button>
             </div>
           </div>
@@ -388,6 +708,7 @@ export default function Recetas() {
           </div>
         </div>
       </footer>
+
     </div>
   );
 }

@@ -11,6 +11,12 @@ services:
       - "80:80"
     restart: always
 
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    restart: always
+
   kiosk:
     image: bh.cr/balenalabs/browser-aarch64
     privileged: true
@@ -24,3 +30,4 @@ services:
       - SHOW_CURSOR=1
     depends_on:
       - frontend
+      - backend
