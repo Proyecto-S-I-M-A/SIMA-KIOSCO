@@ -6,13 +6,13 @@ export default function Header() {
 
     return (
         <header className="bg-white border-b-2 border-slate-200 sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                <div className="flex items-center gap-8">
-                    <div className="text-2xl font-black text-primary tracking-tight">S.I.M.A</div>
+            <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
+                <div className="flex items-center gap-4 md:gap-8">
+                    <div className="text-xl md:text-2xl font-black text-primary tracking-tight">S.I.M.A</div>
                     {view === 'selection' && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl text-primary border border-blue-100">
-                            <ShieldCheck className="w-5 h-5 fill-primary text-white" />
-                            <span className="text-sm font-semibold">Usuario Verificado</span>
+                        <div className="flex items-center gap-1.5 md:gap-2 px-2.5 py-1.5 md:px-4 md:py-2 bg-blue-50 rounded-xl text-primary border border-blue-100">
+                            <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 fill-primary text-white shrink-0" />
+                            <span className="text-xs md:text-sm font-semibold hidden sm:inline">Usuario Verificado</span>
                         </div>
                     )}
                 </div>

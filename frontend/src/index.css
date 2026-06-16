@@ -42,8 +42,13 @@
 @layer base {
   body {
     @apply bg-background-default text-gray-900 font-sans antialiased;
-    overflow: hidden; /* Evita el scroll global para experiencia de Kiosco */
-    touch-action: none; /* Previene gestos nativos del navegador en táctil */
+    overflow: auto; /* Permite scroll en pantallas pequeñas */
     user-select: none; /* Previene la selección de texto en táctil */
+  }
+  @media (min-width: 768px) {
+    body {
+      overflow: hidden; /* Evita el scroll global para experiencia de Kiosco en pantallas grandes */
+      touch-action: none; /* Previene gestos nativos del navegador en táctil */
+    }
   }
 }

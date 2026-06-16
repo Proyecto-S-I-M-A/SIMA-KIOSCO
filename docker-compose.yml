@@ -6,9 +6,14 @@ volumes:
 services:
  
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.template
+      args:
+        - VITE_KIOSK_EMAIL=${VITE_KIOSK_EMAIL}
+        - VITE_KIOSK_PASSWORD=${VITE_KIOSK_PASSWORD}
     ports:
-      - "80:80"
+      - "5173:80"
     restart: always
 
   backend:
@@ -17,17 +22,18 @@ services:
       - "8000:8000"
     restart: always
 
-  kiosk:
+  kiosko:
     image: bh.cr/balenalabs/browser-aarch64
     privileged: true
     network_mode: host
     volumes:
       - "settings:/data"
     environment:
-      - LAUNCH_URL=http://localhost:80
+      - LAUNCH_URL=http://localhost:5173
       - kiosko=1
       - ENABLE_GPU=1
       - SHOW_CURSOR=1
+      - FLAGS=--ignore-certificate-errors --allow-insecure-localhost --test-type
     depends_on:
       - frontend
       - backend

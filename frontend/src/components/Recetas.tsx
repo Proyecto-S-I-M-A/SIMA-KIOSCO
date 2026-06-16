@@ -268,39 +268,39 @@ export default function Recetas() {
       <Header />
 
       {/* Progress Bar */}
-      <div className="bg-white border-b border-slate-100 px-6 py-4">
+      <div className="bg-white border-b border-slate-100 px-4 md:px-6 py-3 md:py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Step 1: Identificar */}
-          <div className="flex items-center gap-3 text-primary">
-            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">1</div>
-            <span className="font-bold text-sm">Identificar</span>
+          <div className="flex items-center gap-1.5 md:gap-3 text-primary">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs md:text-sm">1</div>
+            <span className="font-bold text-xs md:text-sm hidden sm:inline">Identificar</span>
           </div>
-          <div className="flex-1 h-0.5 bg-primary mx-4" />
+          <div className="flex-1 h-0.5 bg-primary mx-1 sm:mx-4" />
 
           {/* Step 2: Seleccionar */}
-          <div className="flex items-center gap-3 text-primary">
-            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">2</div>
-            <span className="font-bold text-sm">Seleccionar</span>
+          <div className="flex items-center gap-1.5 md:gap-3 text-primary">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs md:text-sm">2</div>
+            <span className="font-bold text-xs md:text-sm hidden sm:inline">Seleccionar</span>
           </div>
-          <div className={`flex-1 h-0.5 mx-4 ${view !== 'selection' ? 'bg-primary' : 'bg-slate-200'}`} />
+          <div className={`flex-1 h-0.5 mx-1 sm:mx-4 ${view !== 'selection' ? 'bg-primary' : 'bg-slate-200'}`} />
 
           {/* Step 3: Confirmar Pedido */}
-          <div className={`flex items-center gap-3 ${view !== 'selection' ? 'text-primary' : 'text-slate-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${view !== 'selection' ? 'bg-primary text-white' : 'bg-slate-200'}`}>3</div>
-            <span className="font-bold text-sm">Confirmar Pedido</span>
+          <div className={`flex items-center gap-1.5 md:gap-3 ${view !== 'selection' ? 'text-primary' : 'text-slate-400'}`}>
+            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-xs md:text-sm ${view !== 'selection' ? 'bg-primary text-white' : 'bg-slate-200'}`}>3</div>
+            <span className="font-bold text-xs md:text-sm hidden sm:inline">Confirmar Pedido</span>
           </div>
-          <div className={`flex-1 h-0.5 mx-4 ${isDrawerOpen ? 'bg-primary' : 'bg-slate-200'}`} />
+          <div className={`flex-1 h-0.5 mx-1 sm:mx-4 ${isDrawerOpen ? 'bg-primary' : 'bg-slate-200'}`} />
 
           {/* Step 4: Dispensar */}
-          <div className={`flex items-center gap-3 ${isDrawerOpen ? 'text-primary' : 'text-slate-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${isDrawerOpen ? 'bg-primary text-white ring-4 ring-primary/20 animate-pulse' : 'bg-slate-200'}`}>4</div>
-            <span className="font-bold text-sm">Dispensar</span>
+          <div className={`flex items-center gap-1.5 md:gap-3 ${isDrawerOpen ? 'text-primary' : 'text-slate-400'}`}>
+            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-xs md:text-sm ${isDrawerOpen ? 'bg-primary text-white ring-4 ring-primary/20 animate-pulse' : 'bg-slate-200'}`}>4</div>
+            <span className="font-bold text-xs md:text-sm hidden sm:inline">Dispensar</span>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="grow overflow-y-auto max-w-7xl mx-auto w-full px-6 py-10">
+      <main className="grow overflow-y-auto max-w-7xl mx-auto w-full px-4 py-6 md:px-6 md:py-10">
         <AnimatePresence mode="wait">
           {view === 'selection' ? (
             <motion.div
@@ -427,34 +427,33 @@ export default function Recetas() {
                     key={med.id}
                   >
                     {med.dosis.map((d, i) => (
-                      <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex gap-6">
-                        <div className="w-32 h-32 rounded-xl overflow-hidden shrink-0 bg-slate-50 flex items-center justify-center">
-                          <Pill className="w-12 h-12 text-primary" />
+                      <div key={i} className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 sm:gap-6">
+                        <div className="w-full sm:w-32 h-24 sm:h-32 rounded-xl overflow-hidden shrink-0 bg-slate-50 flex items-center justify-center">
+                          <Pill className="w-10 h-10 md:w-12 md:h-12 text-primary" />
                         </div>
                         <div className="grow space-y-4">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="text-2xl font-bold text-primary">{d.inventario.nombre_medicamento}</h3>
-                              <p className="text-slate-500 font-medium">{d.instrucciones}</p>
+                              <h3 className="text-xl sm:text-2xl font-bold text-primary">{d.inventario.nombre_medicamento}</h3>
+                              <p className="text-sm sm:text-base text-slate-500 font-medium">{d.instrucciones}</p>
                             </div>
-                            {/*  <span className="text-2xl font-bold text-primary">${med.price.toFixed(2)}</span> */}
                           </div>
-                          <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-4 border-t border-slate-50">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 pt-4 border-t border-slate-50">
                             <div>
-                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Doctor(a)</p>
-                              <p className="font-bold text-slate-800">{med.doctor_remitente}</p>
+                              <p className="text-[10px] md:text-xs uppercase font-bold text-slate-400 tracking-widest">Doctor(a)</p>
+                              <p className="text-sm md:text-base font-bold text-slate-800">{med.doctor_remitente}</p>
                             </div>
                             <div>
-                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Hospital</p>
-                              <p className="font-bold text-slate-800">{med.hospital_remitente}</p>
+                              <p className="text-[10px] md:text-xs uppercase font-bold text-slate-400 tracking-widest">Hospital</p>
+                              <p className="text-sm md:text-base font-bold text-slate-800">{med.hospital_remitente}</p>
                             </div>
                             <div>
-                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">RUC Profesional</p>
-                              <p className="font-bold text-slate-800">{med.ruc_doctor_remitente || 'N/A'}</p>
+                              <p className="text-[10px] md:text-xs uppercase font-bold text-slate-400 tracking-widest">RUC Profesional</p>
+                              <p className="text-sm md:text-base font-bold text-slate-800">{med.ruc_doctor_remitente || 'N/A'}</p>
                             </div>
                             <div>
-                              <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Contacto</p>
-                              <p className="font-bold text-slate-800">{med.telefono_hospital || 'N/A'}</p>
+                              <p className="text-[10px] md:text-xs uppercase font-bold text-slate-400 tracking-widest">Contacto</p>
+                              <p className="text-sm md:text-base font-bold text-slate-800">{med.telefono_hospital || 'N/A'}</p>
                             </div>
                           </div>
                         </div>
@@ -485,9 +484,9 @@ export default function Recetas() {
               </div>
 
               {/* Grid: Stepper on Left, Event Terminal Log on Right */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
                 {/* Left Side: Stepper and Current Item details */}
-                <div className="md:col-span-6 bg-white rounded-3xl border border-slate-200 p-8 shadow-md flex flex-col justify-between">
+                <div className="lg:col-span-6 bg-white rounded-3xl border border-slate-200 p-5 md:p-8 shadow-md flex flex-col justify-between">
                   <div className="space-y-6">
                     {/* Current Item Details */}
                     <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
@@ -574,9 +573,9 @@ export default function Recetas() {
                 </div>
 
                 {/* Right Side: Log Console and Actions */}
-                <div className="md:col-span-6 flex flex-col justify-between space-y-6">
+                <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
                   {/* Log Console */}
-                  <div className="border border-slate-800 bg-slate-950 rounded-3xl overflow-hidden shadow-inner flex flex-col grow h-72">
+                  <div className="border border-slate-800 bg-slate-950 rounded-3xl overflow-hidden shadow-inner flex flex-col grow h-64 sm:h-72">
                     <div className="bg-slate-900 px-5 py-3 flex items-center justify-between border-b border-slate-800">
                       <div className="flex items-center gap-2 text-xs font-bold text-slate-400 font-mono">
                         <Terminal className="w-4 h-4 text-cyan-400" />
