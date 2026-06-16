@@ -1,11 +1,54 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", sans-serif;
+
+  /* Colores Médicos Solicitados */
+  --color-primary-med: #0288D1;
+  --color-primary-light: #03A9F4;
+  --color-primary-dark: #01579B;
+
+  --color-secondary-pharma: #2E7D32;
+  --color-secondary-light: #66BB6A;
+  --color-secondary-dark: #1B5E20;
+
+  --color-success-med: #4CAF50;
+  --color-error-med: #F44336;
+  --color-warning-med: #FF9800;
+  --color-info-med: #2196F3;
+
+  --color-background-med: #FAFAFA;
+  --color-surface-med: #FFFFFF;
+
+  --color-text-primary: rgba(0, 0, 0, 0.87);
+  --color-text-secondary: rgba(0, 0, 0, 0.60);
+  --color-divider-med: rgba(0, 0, 0, 0.12);
+
+  --radius-med: 8px;
+
+  --color-primary: #00478d;
+  --color-primary-container: #005eb8;
+  --color-surface: #f7f9fb;
+  --color-surface-container: #eceef0;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #424752;
+  --color-outline: #727783;
+  --color-secondary-container: #d2e6ef;
+
+}
+
 @layer base {
   body {
     @apply bg-background-default text-gray-900 font-sans antialiased;
-    overflow: hidden; /* Evita el scroll global para experiencia de Kiosco */
-    touch-action: none; /* Previene gestos nativos del navegador en táctil */
+    overflow: auto; /* Permite scroll en pantallas pequeñas */
     user-select: none; /* Previene la selección de texto en táctil */
+  }
+  @media (min-width: 768px) {
+    body {
+      overflow: hidden; /* Evita el scroll global para experiencia de Kiosco en pantallas grandes */
+      touch-action: none; /* Previene gestos nativos del navegador en táctil */
+    }
   }
 }

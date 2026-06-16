@@ -1,0 +1,41 @@
+# ==========================================
+# ETAPA 1: Construcción (Build)
+# ==========================================
+# Usamos la variante '-build' que tiene las herramientas necesarias para compilar
+FROM node:20-alpine AS builder
+
+
+# Define el directorio de trabajo
+WORKDIR /app
+
+# Copia los archivos de dependencias (se usa el asterisco para incluir el package-lock.json)
+COPY package*.json ./
+
+# Instala las dependencias
+RUN npm install
+
+# Copia el resto de tu código (React, Vite, etc.)
+COPY . .
+
+# Compila el frontend para producción. 
+# (Si usas Vite, esto generará una carpeta llamada 'dist')
+RUN npm run build
+
+
+# ==========================================
+# ETAPA 2: Servidor Web (Nginx)
+# ==========================================
+# Usamos la imagen oficial de Nginx optimizada (alpine)
+FROM nginx:alpine
+
+# Copiamos SOLAMENTE los archivos compilados de la Etapa 1 a la carpeta de Nginx.
+# Cambia '/app/dist' por '/app/build' si tu comando de build genera esa carpeta en su lugar.
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copiar la configuración personalizada de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Exponemos el puerto 80
+EXPOSE 80
+
+# Nginx ya tiene su propio comando de arranque por defecto, no necesitas CMD
