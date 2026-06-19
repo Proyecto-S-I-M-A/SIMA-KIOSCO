@@ -8,14 +8,14 @@ interface SimaState {
   cedula: string | null;
   wsMessage: string | null;
   wsStatus: string | null;
-  kioskToken: string | null;
+  kioskoToken: string | null;
 
   // Acciones
   setView: (view: ViewState) => void;
   login: (cedula: string) => void;
   logout: () => void;
   setWsUpdate: (status: string, message: string) => void;
-  fetchKioskToken: () => Promise<void>;
+  fetchKioskoToken: () => Promise<void>;
 }
 
 export const useSimaStore = create<SimaState>((set) => ({
@@ -23,7 +23,7 @@ export const useSimaStore = create<SimaState>((set) => ({
   cedula: null,
   wsMessage: null,
   wsStatus: null,
-  kioskToken: ApiClient.getAccessToken(),
+  kioskoToken: ApiClient.getAccessToken(),
 
   setView: (view) => set({ view }),
 
@@ -38,7 +38,7 @@ export const useSimaStore = create<SimaState>((set) => ({
 
   setWsUpdate: (status, message) => set({ wsStatus: status, wsMessage: message }),
 
-  fetchKioskToken: async () => {
+  fetchKioskoToken: async () => {
     try {
       console.log("Obteniendo credenciales del kiosko desde el backend local...");
       const configResponse = await fetch("http://localhost:8000/api/kiosk/credentials");
@@ -71,7 +71,7 @@ export const useSimaStore = create<SimaState>((set) => ({
         console.log("Token obtenido de la API central:", token);
         console.log("Refresh token obtenido de la API central:", refresh);
         if (token) {
-          set({ kioskToken: token });
+          set({ kioskoToken: token });
           ApiClient.saveSessionAuth(token, refresh);
           console.log("Kiosko autenticado con éxito en la API central.");
         }

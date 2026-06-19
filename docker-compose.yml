@@ -33,7 +33,6 @@ services:
       - kiosko=1
       - ENABLE_GPU=1
       - SHOW_CURSOR=1
-      - FLAGS=--ignore-certificate-errors --allow-insecure-localhost --test-type
     depends_on:
       - frontend
       - backend

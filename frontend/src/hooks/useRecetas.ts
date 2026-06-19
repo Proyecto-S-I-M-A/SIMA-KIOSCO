@@ -47,7 +47,7 @@ export interface Receta {
 }
 
 export function useRecetas() {
-  const { cedula, kioskToken } = useSimaStore();
+  const { cedula, kioskoToken } = useSimaStore();
   const [recetas, setRecetas] = useState<Receta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -60,7 +60,7 @@ export function useRecetas() {
           `https://sima-web.onrender.com/api/v1/recetas/dosis/cliente/${cedula}`,
           {
             headers: {
-              'Authorization': `Bearer ${kioskToken}`,
+              'Authorization': `Bearer ${kioskoToken}`,
               Accept: "application/json",
             },
           },
@@ -84,12 +84,12 @@ export function useRecetas() {
         setLoading(false);
       }
     };
-    if (cedula && kioskToken) {
+    if (cedula && kioskoToken) {
       fetchRecetas();
-    } else if (cedula && !kioskToken) {
+    } else if (cedula && !kioskoToken) {
       setLoading(true);
     }
-  }, [cedula, kioskToken]);
+  }, [cedula, kioskoToken]);
 
   return { recetas, loading, error };
 }
