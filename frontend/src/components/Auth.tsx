@@ -8,6 +8,7 @@ import StaffIdentify from './StaffIdentify';
 
 export default function Auth() {
   const [screen, setScreen] = useState<'login' | 'patient_identify' | 'staff_identify'>('login');
+  const [patientMethod, setPatientMethod] = useState<'scan' | 'id' | null>(null);
   const [cedulaInput, setCedulaInput] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,6 +18,7 @@ export default function Auth() {
     setScreen('login');
     setError('');
     setCedulaInput('');
+    setPatientMethod(null);
   };
 
   const handleValidCedula = async (cedula: string) => {
@@ -64,9 +66,10 @@ export default function Auth() {
             transition={{ duration: 0.3 }}
           >
             <ComponentLogin
-              onSelectRole={(role) =>
-                setScreen(role === 'patient' ? 'patient_identify' : 'staff_identify')
-              }
+              onSelectRole={(role, method = null) => {
+                setPatientMethod(method);
+                setScreen(role === 'patient' ? 'patient_identify' : 'staff_identify');
+              }}
             />
           </motion.div>
         )}
@@ -86,6 +89,8 @@ export default function Auth() {
               error={error}
               cedulaInput={cedulaInput}
               setCedulaInput={setCedulaInput}
+              method={patientMethod}
+              setMethod={setPatientMethod}
             />
           </motion.div>
         )}

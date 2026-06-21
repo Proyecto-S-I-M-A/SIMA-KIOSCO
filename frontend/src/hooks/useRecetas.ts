@@ -57,7 +57,7 @@ export function useRecetas() {
     const fetchRecetas = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/v1/recetas/dosis/cliente/${cedula}`,
+          `http://${window.location.hostname}:3000/api/v1/recetas/dosis/cliente/${cedula}`,
           {
             headers: {
               /* 'Authorization': `Bearer ${token}`, */
