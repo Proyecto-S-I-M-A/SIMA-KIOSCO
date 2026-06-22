@@ -8,6 +8,8 @@ interface SimaState {
   cedula: string | null;
   wsMessage: string | null;
   wsStatus: string | null;
+  language: 'es' | 'en';
+
   kioskoToken: string | null;
 
   // Acciones
@@ -15,6 +17,7 @@ interface SimaState {
   login: (cedula: string) => void;
   logout: () => void;
   setWsUpdate: (status: string, message: string) => void;
+  setLanguage: (language: 'es' | 'en') => void;
   fetchKioskoToken: () => Promise<void>;
 }
 
@@ -23,6 +26,7 @@ export const useSimaStore = create<SimaState>((set) => ({
   cedula: null,
   wsMessage: null,
   wsStatus: null,
+  language: 'es',
   kioskoToken: ApiClient.getAccessToken(),
 
   setView: (view) => set({ view }),
@@ -37,6 +41,7 @@ export const useSimaStore = create<SimaState>((set) => ({
   }),
 
   setWsUpdate: (status, message) => set({ wsStatus: status, wsMessage: message }),
+  setLanguage: (language) => set({ language }),
 
   fetchKioskoToken: async () => {
     try {

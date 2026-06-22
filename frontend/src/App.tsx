@@ -83,14 +83,15 @@ function Despacho() {
 
 function App() {
   const view = useSimaStore(state => state.view);
-  const fetchKioskToken = useSimaStore(state => state.fetchKioskToken);
+  const fetchKioskToken = useSimaStore(state => state.fetchKioskoToken);
 
   useEffect(() => {
     fetchKioskToken();
   }, [fetchKioskToken]);
 
   return (
-    <div className="w-full h-full min-h-screen bg-background-default font-sans selection:bg-transparent overflow-auto md:overflow-hidden md:touch-none">
+
+    <div className="w-full h-full min-h-screen bg-stitch-background font-sans selection:bg-transparent overflow-y-auto md:touch-none">
       {view === 'AUTH' && <Auth />}
       {view === 'RECETAS' && <Recetas />}
       {view === 'DESPACHO' && <Despacho />}
